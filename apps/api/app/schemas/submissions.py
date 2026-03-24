@@ -28,9 +28,10 @@ class SubmissionResponse(BaseModel):
     assignment_id: UUID
     student_id: UUID
     content: str | None
+    content_json: dict | None = None
     ai_grade: dict | None
     human_override: dict | None
-    hints_used: dict | None
+    hints_used: list | dict | None
     xp_awarded: int
     gold_awarded: int
     feedback: str | None

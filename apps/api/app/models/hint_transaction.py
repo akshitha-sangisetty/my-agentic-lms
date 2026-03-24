@@ -17,7 +17,7 @@ class HintTransaction(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "hint_transactions"
 
     student_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
-    assignment_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("assignments.id"), nullable=False)
+    assignment_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("assignments.id"), nullable=True)
     tier: Mapped[HintTier] = mapped_column(Enum(HintTier), nullable=False)
     gold_cost: Mapped[int] = mapped_column(Integer, nullable=False)
     hint_text: Mapped[str] = mapped_column(Text, nullable=False)

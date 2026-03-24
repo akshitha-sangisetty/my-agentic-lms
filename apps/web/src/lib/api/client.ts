@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export class ApiError extends Error {
   constructor(
@@ -23,7 +23,13 @@ export async function apiClient<T>(
   });
 
   if (!res.ok) {
-    throw new ApiError(res.status, await res.json());
+    let data: Record<string, unknown>;
+    try { data = await res.json(); } catch { data = { detail: res.statusText || 'Unknown error' }; }
+    throw  new ApiError(res.status, data);
+  }
+
+  if (res.status === 204) {
+    return undefined as T;
   }
 
   return res.json();
@@ -33,9 +39,15 @@ export async function uploadFile(
   path: string,
   file: File,
   token: string,
+  extraFields?: Record<string, string>,
 ): Promise<Record<string, unknown>> {
   const formData = new FormData();
   formData.append('file', file);
+  if (extraFields) {
+    for (const [key, value] of Object.entries(extraFields)) {
+      formData.append(key, value);
+    }
+  }
 
   const res = await fetch(`${BASE_URL}${path}`, {
     method: 'POST',
@@ -44,7 +56,9 @@ export async function uploadFile(
   });
 
   if (!res.ok) {
-    throw new ApiError(res.status, await res.json());
+    let data: Record<string, unknown>;
+    try { data = await res.json(); } catch { data = { detail: res.statusText || 'Unknown error' }; }
+    throw new ApiError(res.status, data);
   }
 
   return res.json();

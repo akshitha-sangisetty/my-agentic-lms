@@ -28,6 +28,20 @@ export interface IngestionStatus {
   estimated_remaining_seconds?: number;
 }
 
+// ─── Course Material ─────────────────────────────────────
+export interface CourseMaterial {
+  id: string;
+  course_id: string;
+  filename: string;
+  file_type: string;
+  file_size: number;
+  object_name: string;
+  status: 'UPLOADED' | 'PARSING' | 'COMPLETED' | 'FAILED';
+  unit_number: number | null;
+  unit_name: string | null;
+  created_at: string | null;
+}
+
 // ─── Assignment ──────────────────────────────────────────
 export type AssignmentType = 'MCQ' | 'SCENARIO' | 'CODE_LAB' | 'DEBATE' | 'REVERSE_ESSAY' | 'CUSTOM';
 
@@ -47,12 +61,19 @@ export interface Assignment {
   max_gold: number;
   difficulty: number;
   order_index: number;
+  unit_number: number | null;
+  unit_name: string | null;
+  group_id: string | null;
 }
 
 export interface AssignmentGenerationConfig {
   types?: AssignmentType[];
   count_per_type?: number;
+  mcq_count?: number;
   difficulty_range?: [number, number];
+  unit_number?: number;
+  unit_name?: string;
+  model?: string;
 }
 
 // ─── Submission ──────────────────────────────────────────
@@ -61,6 +82,7 @@ export interface Submission {
   assignment_id: string;
   student_id: string;
   content: string | null;
+  content_json: Record<string, unknown> | null;
   ai_grade: Record<string, unknown> | null;
   human_override: Record<string, unknown> | null;
   hints_used: Record<string, unknown> | null;

@@ -2,7 +2,7 @@ import enum
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Enum, ForeignKey, Integer, String
+from sqlalchemy import Enum, ForeignKey, Integer, String, Uuid
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -64,6 +64,9 @@ class Assignment(Base, UUIDMixin, TimestampMixin):
     prerequisite_concepts: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
     difficulty: Mapped[int] = mapped_column(Integer, default=1)  # 1-5 scale
     order_index: Mapped[int] = mapped_column(Integer, default=0)
+    unit_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    unit_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    group_id: Mapped[uuid.UUID | None] = mapped_column(Uuid, nullable=True, index=True)
 
     # Relationships
     course: Mapped["Course"] = relationship(back_populates="assignments")

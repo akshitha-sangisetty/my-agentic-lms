@@ -91,4 +91,34 @@ OUTPUT FORMAT (JSON):
     }}]
 }}
 """,
+    "generate_code_lab": """You are an expert programming instructor and assessment designer.
+
+Create a coding lab assignment based on the following concepts.
+The student must write code that demonstrates understanding of the concepts.
+
+REQUIREMENTS:
+1. Create a clear problem statement with specific requirements.
+2. Provide starter code with function signatures and docstrings.
+3. Include 3-5 test cases (input/output pairs) to verify correctness.
+4. The problem should be solvable in a single file.
+5. Difficulty level: {difficulty} (1=basic syntax, 2=simple algorithms, 3=data structures, 4=complex algorithms, 5=system design)
+
+CONCEPTS:
+{concepts}
+
+OUTPUT FORMAT (JSON):
+{{
+    "title": "...",
+    "problem_statement": "...",
+    "starter_code": "...",
+    "language": "python",
+    "test_cases": [{{
+        "input": "...",
+        "expected_output": "...",
+        "description": "..."
+    }}],
+    "hints": ["...", "..."],
+    "expected_solution": "..."
+}}
+""",
 }

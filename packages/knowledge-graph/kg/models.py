@@ -10,6 +10,10 @@ class ConceptNode:
     description: str
     course_id: str
     difficulty: int = 1  # 1-5
+    unit_number: int | None = None
+    unit_name: str | None = None
+    position: int = 0  # ordering within unit; higher = later in learning path
+    material_id: str = ""  # UUID of source CourseMaterial — for cascading deletes
     metadata: dict = field(default_factory=dict)
 
 

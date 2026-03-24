@@ -1,8 +1,10 @@
+from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
 from app.models.course import CourseStatus, GamificationLevel, GradingStrictness
+from app.models.course_material import MaterialStatus
 
 
 class CourseCreateRequest(BaseModel):
@@ -47,3 +49,18 @@ class IngestionStatusResponse(BaseModel):
     progress_pct: int
     current_step: str
     estimated_remaining_seconds: int | None = None
+
+
+class CourseMaterialResponse(BaseModel):
+    id: UUID
+    course_id: UUID
+    filename: str
+    file_type: str
+    file_size: int
+    object_name: str
+    status: MaterialStatus
+    unit_number: int | None = None
+    unit_name: str | None = None
+    created_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)

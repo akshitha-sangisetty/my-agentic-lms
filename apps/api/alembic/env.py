@@ -26,8 +26,19 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
+def include_object(object, name, type_, reflected, compare_to):  # type: ignore[no-untyped-def]
+    """Only include our app's tables, ignore Keycloak and other tables."""
+    if type_ == "table" and reflected and compare_to is None:
+        return False  # Don't drop tables we don't manage
+    return True
+
+
 def do_run_migrations(connection):  # type: ignore[no-untyped-def]
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        include_object=include_object,
+    )
     with context.begin_transaction():
         context.run_migrations()
 

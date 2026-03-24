@@ -3,12 +3,14 @@ import uuid
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Enum, ForeignKey, String
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
     from app.models.assignment import Assignment
+    from app.models.course_material import CourseMaterial
     from app.models.institution import Institution
 
 
@@ -52,8 +54,10 @@ class Course(Base, UUIDMixin, TimestampMixin):
     hints_enabled: Mapped[bool] = mapped_column(default=True)
     leaderboard_visible: Mapped[bool] = mapped_column(default=True)
     streak_tracking_active: Mapped[bool] = mapped_column(default=True)
+    mermaid_cache: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
     # Relationships
     institution: Mapped["Institution"] = relationship(back_populates="courses")
     faculty: Mapped["User"] = relationship(foreign_keys=[faculty_id])
     assignments: Mapped[list["Assignment"]] = relationship(back_populates="course")
+    materials: Mapped[list["CourseMaterial"]] = relationship(back_populates="course")

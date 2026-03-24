@@ -8,7 +8,11 @@ from app.models.assignment import AssignmentSource, AssignmentStatus, Assignment
 class AssignmentGenerationConfig(BaseModel):
     types: list[AssignmentType] = [AssignmentType.MCQ, AssignmentType.SCENARIO]
     count_per_type: int = 3
+    mcq_count: int | None = None  # Override count specifically for MCQs
     difficulty_range: tuple[int, int] = (1, 3)
+    unit_number: int | None = None
+    unit_name: str | None = None
+    model: str | None = None  # Optional model override
 
 
 class HintConfig(BaseModel):
@@ -46,6 +50,9 @@ class AssignmentResponse(BaseModel):
     max_gold: int
     difficulty: int
     order_index: int
+    unit_number: int | None = None
+    unit_name: str | None = None
+    group_id: UUID | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

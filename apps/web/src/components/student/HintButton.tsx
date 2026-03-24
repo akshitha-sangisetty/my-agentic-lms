@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { useGamificationStore } from '@/stores/gamification';
+import { useAuthStore } from '@/stores/auth';
+import { useMascotStore } from '@/stores/mascot';
+import { purchaseHint } from '@/lib/api/gamification';
 
 interface HintButtonProps {
   assignmentId: string;
@@ -10,46 +13,72 @@ interface HintButtonProps {
   onHintReceived?: (hintText: string) => void;
 }
 
+const tierConfig = {
+  NUDGE: { label: 'Nudge', icon: '💡', color: 'accent-green' },
+  GUIDANCE: { label: 'Guidance', icon: '🧭', color: 'accent-blue' },
+  SOLUTION: { label: 'Solution', icon: '🗝️', color: 'accent-purple' },
+};
+
 export function HintButton({ assignmentId, tier, cost, onHintReceived }: HintButtonProps) {
   const [confirming, setConfirming] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { gold, spendGold } = useGamificationStore();
+  const token = useAuthStore((s) => s.token);
 
-  const tierLabels = { NUDGE: 'Nudge', GUIDANCE: 'Guidance', SOLUTION: 'Solution' };
+  const config = tierConfig[tier];
   const canAfford = gold >= cost;
 
   const handlePurchase = async () => {
-    if (!canAfford) return;
+    if (!canAfford || !token) return;
 
     setLoading(true);
-    const success = spendGold(cost);
+    setError(null);
 
-    if (success) {
-      // TODO(agent): Call purchaseHint API, get actual hint text
-      onHintReceived?.('Hint content will appear here.');
+    try {
+      const result = await purchaseHint(assignmentId, tier, token);
+
+      // Update local gold balance with server response
+      spendGold(cost);
+
+      // Deliver hint through Rune mascot
+      useMascotStore.getState().deliverHint(result.hint_text, tier, cost);
+
+      onHintReceived?.(result.hint_text);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Purchase failed');
+      // Don't deduct gold on failure
+    } finally {
+      setLoading(false);
+      setConfirming(false);
     }
-
-    setLoading(false);
-    setConfirming(false);
   };
 
   if (confirming) {
     return (
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-600">Spend {cost} Gold?</span>
+      <div className="flex items-center gap-2 animate-fade-in">
+        <span className="text-xs text-text-muted">Spend {cost} Gold?</span>
         <button
           onClick={handlePurchase}
           disabled={!canAfford || loading}
-          className="px-3 py-1 text-sm bg-gold text-white rounded-lg hover:bg-gold-dark disabled:opacity-50"
+          className="px-3 py-1.5 text-xs font-bold rounded-lg bg-gradient-gold text-surface-base
+                     disabled:opacity-40 transition-all duration-200
+                     hover:shadow-lg hover:shadow-gold/20"
         >
-          {loading ? '...' : 'Confirm'}
+          {loading ? (
+            <span className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded-full border-2 border-surface-base/30 border-t-surface-base animate-spin" />
+              Unlocking...
+            </span>
+          ) : 'Confirm'}
         </button>
         <button
-          onClick={() => setConfirming(false)}
-          className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-100"
+          onClick={() => { setConfirming(false); setError(null); }}
+          className="px-3 py-1.5 text-xs text-text-faint hover:text-text-muted rounded-lg hover:bg-surface-overlay transition-colors"
         >
           Cancel
         </button>
+        {error && <span className="text-xs text-red-400">{error}</span>}
       </div>
     );
   }
@@ -59,16 +88,20 @@ export function HintButton({ assignmentId, tier, cost, onHintReceived }: HintBut
       onClick={() => setConfirming(true)}
       disabled={!canAfford}
       className={`
-        flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors
+        flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-xs
+        transition-all duration-200 border-2
         ${canAfford
-          ? 'bg-gold/10 text-gold-dark hover:bg-gold/20 border border-gold/30'
-          : 'bg-gray-100 text-gray-400 cursor-not-allowed'}
+          ? `bg-${config.color}/5 text-${config.color} border-${config.color}/20
+             hover:bg-${config.color}/10 hover:border-${config.color}/40
+             hover:shadow-lg hover:shadow-${config.color}/10`
+          : 'bg-surface-overlay text-text-faint border-surface-border cursor-not-allowed opacity-50'}
       `}
     >
-      <span>{tierLabels[tier]}</span>
-      <span className="flex items-center gap-1">
-        <span className="text-gold">&#9679;</span>
-        {cost}
+      <span className="text-sm">{config.icon}</span>
+      <span>{config.label}</span>
+      <span className="flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded-md bg-gold/10">
+        <span className="text-gold text-xs">●</span>
+        <span className="text-gold font-bold">{cost}</span>
       </span>
     </button>
   );

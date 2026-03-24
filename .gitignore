@@ -36,5 +36,12 @@ htmlcov/
 # MinIO data
 minio-data/
 
+# Certificates / TLS keys
+certs/
+apps/web/certificates/
+
+# TypeScript build info
+*.tsbuildinfo
+
 # Alembic
 apps/api/alembic/versions/__pycache__/
