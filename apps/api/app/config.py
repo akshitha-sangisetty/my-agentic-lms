@@ -77,7 +77,7 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000"
     debug: bool = True
 
-    model_config = {"env_file": ".env.local", "env_file_encoding": "utf-8", "extra": "ignore"}
+    model_config = {"env_file": (".env", ".env.local"), "env_file_encoding": "utf-8", "extra": "ignore"}
 
 
 settings = Settings()
