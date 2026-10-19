@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 async def _call_llm(prompt: str) -> str:
     """Call the LLM router for grading tasks."""
     from llm import LLMRouter
-    llm = LLMRouter(ollama_url="http://localhost:11434/v1")
+    llm = LLMRouter()
     response = await llm.complete(task_type="grading", prompt=prompt)
     return response.content.strip()
 

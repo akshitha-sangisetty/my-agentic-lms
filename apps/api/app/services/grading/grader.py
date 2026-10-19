@@ -50,7 +50,7 @@ async def grade_submission(submission_id: UUID, db: AsyncSession) -> dict:
 
     # 2. Grade against each criterion via LLM
     from llm import LLMRouter
-    llm = LLMRouter(ollama_url=settings.ollama_base_url)
+    llm = LLMRouter()
 
     grade_results = []
     total_score = 0.0

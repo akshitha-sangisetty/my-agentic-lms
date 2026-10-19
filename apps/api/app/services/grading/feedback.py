@@ -69,7 +69,7 @@ async def generate_feedback(grade_result: dict, knowledge_graph: dict) -> str:
 
     try:
         from llm import LLMRouter
-        llm = LLMRouter(ollama_url=settings.ollama_base_url)
+        llm = LLMRouter()
         response = await llm.complete(task_type="grading", prompt=prompt)
         return response.content.strip()
     except Exception as e:

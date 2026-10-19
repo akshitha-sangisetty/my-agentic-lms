@@ -96,7 +96,7 @@ async def update_learning_summary(
     )
 
     try:
-        router = LLMRouter(ollama_url="http://localhost:11434/v1")
+        router = LLMRouter()
         result = await router.complete(
             task_type="tutoring",
             messages=[{"role": "user", "content": prompt}],

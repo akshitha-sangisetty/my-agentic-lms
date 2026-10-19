@@ -6,8 +6,13 @@ __pycache__/
 *.pyo
 
 # Environment
-.env.local
-.env.*.local
+.env
+.env.*
+*.env
+!.env.example
+
+# Local Database
+.pgdata/
 
 # Build outputs
 .next/

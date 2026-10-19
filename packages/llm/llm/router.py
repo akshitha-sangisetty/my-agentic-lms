@@ -1,9 +1,10 @@
 """
 LLM Router — routes requests to the appropriate model endpoint by task type.
 
-Supports vLLM and Ollama backends via OpenAI-compatible APIs.
+Supports Cloud APIs (OpenAI, OpenRouter, Groq, Gemini), self-hosted vLLM, and local Ollama.
 """
 
+import os
 from dataclasses import dataclass
 
 from llm.provider import LLMProvider, LLMResponse
@@ -29,13 +30,24 @@ DEFAULT_TASK_ROUTING: dict[str, TaskConfig] = {
 }
 
 OLLAMA_TASK_ROUTING: dict[str, TaskConfig] = {
-    "creative": TaskConfig("ollama", "qwen3-coder:latest", 0.8, 4096),
-    "grading": TaskConfig("ollama", "qwen3-coder:latest", 0.1, 2048),
-    "coding": TaskConfig("ollama", "qwen3-coder:latest", 0.3, 4096),
-    "tutoring": TaskConfig("ollama", "qwen3-coder:latest", 0.3, 2048),
-    "ingestion": TaskConfig("ollama", "llama3:latest", 0.2, 2048),
-    "vision": TaskConfig("ollama", "qwen2.5vl:latest", 0.2, 2048),
+    "creative": TaskConfig("ollama", "qwen2.5-coder:7b", 0.8, 4096),
+    "grading": TaskConfig("ollama", "qwen2.5-coder:7b", 0.1, 2048),
+    "coding": TaskConfig("ollama", "qwen2.5-coder:7b", 0.3, 4096),
+    "tutoring": TaskConfig("ollama", "qwen2.5-coder:7b", 0.3, 2048),
+    "ingestion": TaskConfig("ollama", "qwen2.5-coder:7b", 0.2, 2048),
+    "vision": TaskConfig("ollama", "qwen2.5-coder:7b", 0.2, 2048),
 }
+
+
+def _get_cloud_routing(model: str) -> dict[str, TaskConfig]:
+    return {
+        "creative": TaskConfig("openai", model, 0.8, 4096),
+        "grading": TaskConfig("openai", model, 0.1, 2048),
+        "coding": TaskConfig("openai", model, 0.3, 4096),
+        "tutoring": TaskConfig("openai", model, 0.3, 2048),
+        "ingestion": TaskConfig("openai", model, 0.2, 2048),
+        "vision": TaskConfig("openai", model, 0.2, 2048),
+    }
 
 
 class LLMRouter:
@@ -47,17 +59,38 @@ class LLMRouter:
         fast_url: str = "http://localhost:8001/v1",
         vision_url: str = "http://localhost:8002/v1",
         ollama_url: str | None = None,
+        api_key: str | None = None,
+        base_url: str | None = None,
     ):
-        self.providers: dict[str, LLMProvider] = {
-            "primary": VLLMProvider(base_url=primary_url),
-            "fast": VLLMProvider(base_url=fast_url),
-            "vision": VLLMProvider(base_url=vision_url),
-        }
-        if ollama_url:
+        openai_key = api_key or os.getenv("OPENAI_API_KEY") or os.getenv("LLM_API_KEY")
+        if not openai_key:
+            try:
+                from dotenv import load_dotenv
+                load_dotenv()
+                openai_key = os.getenv("OPENAI_API_KEY") or os.getenv("LLM_API_KEY")
+            except Exception:
+                pass
+        cloud_model = os.getenv("OPENAI_MODEL") or "gpt-4o-mini"
+
+        # Check for API key first (takes priority over local Ollama)
+        if openai_key:
+            from llm.openai_provider import OpenAIProvider
+            self.providers: dict[str, LLMProvider] = {
+                "openai": OpenAIProvider(api_key=openai_key, base_url=base_url, default_model=cloud_model)
+            }
+            self.task_routing = _get_cloud_routing(cloud_model)
+        elif ollama_url:
             from llm.ollama_provider import OllamaProvider
-            self.providers["ollama"] = OllamaProvider(base_url=ollama_url)
+            self.providers = {
+                "ollama": OllamaProvider(base_url=ollama_url),
+            }
             self.task_routing = OLLAMA_TASK_ROUTING
         else:
+            self.providers = {
+                "primary": VLLMProvider(base_url=primary_url),
+                "fast": VLLMProvider(base_url=fast_url),
+                "vision": VLLMProvider(base_url=vision_url),
+            }
             self.task_routing = DEFAULT_TASK_ROUTING
 
     async def complete(

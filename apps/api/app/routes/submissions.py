@@ -127,7 +127,7 @@ async def submit_assignment(
         code_solves_problem = False  # LLM verdict on whether code addresses the problem
         try:
             from llm import LLMRouter
-            llm = LLMRouter(ollama_url=settings.ollama_base_url)
+            llm = LLMRouter()
             problem_statement = content.get('problem_statement', assignment.description or assignment.title)
             quality_prompt = (
                 f"You are a strict code grader. Assess whether this student code actually "

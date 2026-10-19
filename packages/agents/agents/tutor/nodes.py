@@ -56,7 +56,7 @@ async def resolve_learning_path(state: TutorState) -> dict:
 
     try:
         from llm.router import LLMRouter
-        router = LLMRouter(ollama_url="http://localhost:11434/v1")
+        router = LLMRouter()
         concepts_list = "\n".join(
             f'- {c["name"]}: {c.get("description", "")}'
             for c in concepts
@@ -213,7 +213,7 @@ async def socratic_respond(state: TutorState) -> dict:
         messages.append({"role": "user", "content": state["question"]})
 
     try:
-        router = LLMRouter(ollama_url="http://localhost:11434/v1")
+        router = LLMRouter()
         result = await router.complete(
             task_type="tutoring",
             messages=messages,
@@ -286,7 +286,7 @@ async def assess_mastery(state: TutorState) -> dict:
 
     try:
         from llm.router import LLMRouter
-        router = LLMRouter(ollama_url="http://localhost:11434/v1")
+        router = LLMRouter()
         prompt = PROMPTS["assess_mastery"].format(
             concept_name=assess_concept["name"],
             concept_description=assess_concept.get("description", ""),

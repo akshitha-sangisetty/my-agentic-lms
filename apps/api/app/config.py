@@ -71,6 +71,11 @@ class Settings(BaseSettings):
     enable_debate_bot: bool = False
     enable_economy_balancing: bool = False
 
+    # ─── Cloud LLM API ───────────────────────────────────────────
+    openai_api_key: str = ""
+    openai_base_url: str = ""
+    openai_model: str = "gpt-4o-mini"
+
     # ─── App ──────────────────────────────────────────────────
     api_host: str = "0.0.0.0"
     api_port: int = 8000
@@ -81,3 +86,13 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+if settings.openai_api_key:
+    import os
+    os.environ["OPENAI_API_KEY"] = settings.openai_api_key
+if settings.openai_base_url:
+    import os
+    os.environ["OPENAI_BASE_URL"] = settings.openai_base_url
+if settings.openai_model:
+    import os
+    os.environ["OPENAI_MODEL"] = settings.openai_model

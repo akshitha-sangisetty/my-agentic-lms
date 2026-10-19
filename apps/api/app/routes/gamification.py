@@ -193,7 +193,7 @@ async def purchase_hint(
     # Generate hint via LLM
     try:
         from llm import LLMRouter
-        llm = LLMRouter(ollama_url=settings.ollama_base_url)
+        llm = LLMRouter()
         response = await llm.complete(task_type="tutoring", prompt=prompt)
         hint_text = response.content.strip()
     except Exception:

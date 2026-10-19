@@ -25,7 +25,7 @@ class RetrievedChunk:
 
 async def _encode_query(query: str) -> list[float]:
     """Encode a query string via the remote embedding server."""
-    async with httpx.AsyncClient(timeout=30.0) as client:
+    async with httpx.AsyncClient(timeout=3.0) as client:
         resp = await client.post(
             f"{EMBEDDING_SERVER_URL}/embed",
             json={"inputs": [{"text": query}], "normalize": True},

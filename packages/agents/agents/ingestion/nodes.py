@@ -41,10 +41,7 @@ async def chunk(state: IngestionState) -> dict:
 
     errors = list(state.get("errors", []))
     try:
-        llm_router = None
-        ollama_url = state.get("ollama_base_url")
-        if ollama_url:
-            llm_router = LLMRouter(ollama_url=ollama_url)
+        llm_router = LLMRouter()
 
         chunks = await semantic_chunk(
             pages=state["parsed_pages"],
@@ -110,10 +107,7 @@ async def build_graph(state: IngestionState) -> dict:
 
     errors = list(state.get("errors", []))
     try:
-        llm_router = None
-        ollama_url = state.get("ollama_base_url")
-        if ollama_url:
-            llm_router = LLMRouter(ollama_url=ollama_url)
+        llm_router = LLMRouter()
 
         concepts = await extract_concepts(
             chunks=state["chunks"],

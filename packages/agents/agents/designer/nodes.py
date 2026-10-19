@@ -74,9 +74,6 @@ def _format_concepts(graph: dict) -> str:
 def _get_router(state: DesignerState):
     """Create an LLM router from state config."""
     from llm.router import LLMRouter
-    ollama_url = state.get("ollama_base_url")
-    if ollama_url:
-        return LLMRouter(ollama_url=ollama_url)
     return LLMRouter()
 
 

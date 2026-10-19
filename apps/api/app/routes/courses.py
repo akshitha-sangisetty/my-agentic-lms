@@ -538,7 +538,7 @@ Rules:
 9. Each statement must be on its own line. Never concatenate multiple statements on one line.
 """
 
-    llm = LLMRouter(ollama_url=settings.ollama_base_url)
+    llm = LLMRouter()
     response = await llm.complete(
         task_type="creative",
         messages=[

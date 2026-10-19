@@ -206,7 +206,7 @@ async def tutor_chat(websocket: WebSocket) -> None:
                         question = data.get("question", "the current topic")
 
                         from llm.router import LLMRouter
-                        llm_router = LLMRouter(ollama_url="http://localhost:11434/v1")
+                        llm_router = LLMRouter()
                         hint_result = await llm_router.complete(
                             task_type="tutoring",
                             prompt=PROMPTS[prompt_key].format(
